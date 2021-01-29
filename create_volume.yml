@@ -1,0 +1,154 @@
+- name: Create Volume
+  hosts: localhost
+  vars_files:
+    - storage_vault.yml
+  vars:
+    - myauthstring: "{{storage_username}}:{{storage_password}}"
+    - volume_label: "WilliamJvN"
+    - volume_capacity_in_gb: 1
+  tasks:
+    - name: 'Get Session Token'
+      uri:
+        url: 'https://{{storage_ip}}/ConfigurationManager/v1/objects/sessions'
+        method: POST
+        body:
+          {"authenticationTimeout":600}
+        body_format: json
+        headers:
+          Connection: 'keep-alive'
+          Cache-Control: 'no-store'
+          Accept-Language: 'en'
+          Authorization: 'Basic {{myauthstring | b64encode}}'
+          Content-Type: 'application/json'
+          Accept: 'application/json, text/plain, */*'
+          Sec-Fetch-Site: 'same-origin'
+          Sec-Fetch-Mode: 'cors'
+          Sec-Fetch-Dest: 'empty'
+        validate_certs: no
+      register: token_response
+
+    - name: 'Get Pool Data'
+      uri:
+        url: 'https://{{storage_ip}}/ConfigurationManager/v1/objects/pools'
+        method: GET
+        headers:
+          Connection: 'keep-alive'
+          Authorization: 'Session {{token_response.json.token}}'
+          Content-Type: 'application/json'
+          Accept-Language: 'en'
+          Accept: 'application/json, text/plain, */*'
+          Sec-Fetch-Site: 'same-origin'
+          Sec-Fetch-Mode: 'cors'
+        validate_certs: no
+      register: pool_response
+
+
+    - name: 'Set My Pool to use'
+      set_fact:
+        my_pool: "{{ pool_response.json.data.0.poolId }}"
+      when: (pool_response.json.data|length >0) and (my_pool is undefined)
+
+    - name: 'Create Volume'
+      uri:
+        url: 'https://{{storage_ip}}/ConfigurationManager/v1/objects/ldevs'
+        method: POST
+        body:
+          {"byteFormatCapacity":"{{volume_capacity_in_gb}}G","poolId":"{{my_pool}}"}
+        body_format: json
+        status_code: 202
+        headers:
+          Connection: 'keep-alive'
+          Authorization: 'Session {{token_response.json.token}}'
+          Content-Type: 'application/json'
+          Accept-Language: 'en'
+          Accept: 'application/json, text/plain, */*'
+          Sec-Fetch-Site: 'same-origin'
+          Sec-Fetch-Mode: 'cors'
+          Sec-Fetch-Dest: 'empty'
+        validate_certs: no
+      register: create_volume_response
+      when: (my_pool is defined)
+
+
+    - name: 'Get Job Status'
+      uri:
+        url: 'https://{{storage_ip}}{{create_volume_response.json.self}}'
+        method: GET
+        headers:
+          Connection: 'keep-alive'
+          Authorization: 'Session {{token_response.json.token}}'
+          Content-Type: 'application/json'
+          Accept-Language: 'en'
+          Accept: 'application/json, text/plain, */*'
+          Sec-Fetch-Site: 'same-origin'
+          Sec-Fetch-Mode: 'cors'
+        validate_certs: no
+      register: job_status_response
+      until: job_status_response.json.state != "Started"
+      retries: 600
+      delay: 1
+
+    - debug: var=job_status_response.json.affectedResources
+    - debug: var=job_status_response
+      when: (job_status_response.json.affectedResources is undefined)
+
+    - name: 'Change LDEV Name'
+      uri:
+        url: 'https://{{storage_ip}}{{job_status_response.json.affectedResources.0}}'
+        method: PUT
+        body:
+          { "label": "{{volume_label}}"}
+        body_format: json
+        status_code: 202
+        headers:
+          Connection: 'keep-alive'
+          Authorization: 'Session {{token_response.json.token}}'
+          Content-Type: 'application/json'
+          Accept-Language: 'en'
+          Accept: 'application/json, text/plain, */*'
+          Sec-Fetch-Site: 'same-origin'
+          Sec-Fetch-Mode: 'cors'
+        validate_certs: no
+      register: ldev_name_response
+      when: (job_status_response.json.affectedResources is defined)
+
+    - name: 'Get Job Status'
+      uri:
+        url: 'https://{{storage_ip}}{{ldev_name_response.json.self}}'
+        method: GET
+        headers:
+          Connection: 'keep-alive'
+          Authorization: 'Session {{token_response.json.token}}'
+          Content-Type: 'application/json'
+          Accept-Language: 'en'
+          Accept: 'application/json, text/plain, */*'
+          Sec-Fetch-Site: 'same-origin'
+          Sec-Fetch-Mode: 'cors'
+        validate_certs: no
+      register: job_status_response
+      until: job_status_response.json.state != "Started"
+      retries: 600
+      delay: 1
+
+
+    - debug: var=job_status_response
+      when: (job_status_response.json.affectedResources is undefined)
+
+    - name: 'Discard Session Token'
+      uri:
+        url: 'https://{{storage_ip}}/ConfigurationManager/v1/objects/sessions/{{token_response.json.sessionId}}'
+        method: DELETE
+        headers:
+          Connection: 'keep-alive'
+          Authorization: 'Session {{token_response.json.token}}'
+          Content-Type: 'application/json'
+          Accept: 'application/json, text/plain, */*'
+          Sec-Fetch-Site: 'same-origin'
+          Sec-Fetch-Mode: 'cors'
+          Sec-Fetch-Dest: 'empty'
+        validate_certs: no
+      register: logout_response
+
+
+
+
