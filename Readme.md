@@ -1,4 +1,4 @@
-# Manipulation of Hitachi Vantara Arrays using PFRest
+# Manipulation of Hitachi Arrays using PFRest
 ## Setup
 * Create storage_vault.yml file using ansible-vault using:
 
@@ -9,8 +9,8 @@
     ---
     
     storage_ip: 1.1.1.1 #This is the IP of your array <br>
-    storage_username: maintenance #Storage Username to use<br>
-    storage_password: raid-maintenance #Storage Password to use
+    storage_username: ma....ce #Storage Username to use example<br>
+    storage_password: raid-ma....ce #Storage Password to use example
     
 # Running a playbook
 * Check the variables at the top align to your goal. 
