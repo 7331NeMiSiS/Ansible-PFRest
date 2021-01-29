@@ -6,8 +6,7 @@
     
 * Populated the required variables:
 
-    ---
-    
+    \---<br>
     storage_ip: 1.1.1.1 #This is the IP of your array <br>
     storage_username: ma....ce #Storage Username to use example<br>
     storage_password: raid-ma....ce #Storage Password to use example
