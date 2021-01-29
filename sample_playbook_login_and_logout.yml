@@ -1,0 +1,45 @@
+- name: Login to Storage PFREST
+  hosts: localhost
+  vars_files:
+    - storage_vault.yml
+  vars:
+    - myauthstring: "{{storage_username}}:{{storage_password}}"
+  tasks:
+    - name: 'Get Session Token'
+      uri:
+        url: 'https://{{storage_ip}}/ConfigurationManager/v1/objects/sessions'
+        method: POST
+        body:
+          {"authenticationTimeout":600}
+        body_format: json
+        headers:
+          Connection: 'keep-alive'
+          Cache-Control: 'no-store'
+          Accept-Language: 'en'
+          Authorization: 'Basic {{myauthstring | b64encode}}'
+          Content-Type: 'application/json'
+          Accept: 'application/json, text/plain, */*'
+          Sec-Fetch-Site: 'same-origin'
+          Sec-Fetch-Mode: 'cors'
+          Sec-Fetch-Dest: 'empty'
+        validate_certs: no
+      register: token_response
+
+    - name: 'Discard Session Token'
+      uri:
+        url: 'https://{{storage_ip}}/ConfigurationManager/v1/objects/sessions/{{token_response.json.sessionId}}'
+        method: DELETE
+        headers:
+          Connection: 'keep-alive'
+          Authorization: 'Session {{token_response.json.token}}'
+          Content-Type: 'application/json'
+          Accept: 'application/json, text/plain, */*'
+          Sec-Fetch-Site: 'same-origin'
+          Sec-Fetch-Mode: 'cors'
+          Sec-Fetch-Dest: 'empty'
+        validate_certs: no
+      register: logout_response
+
+
+
+
