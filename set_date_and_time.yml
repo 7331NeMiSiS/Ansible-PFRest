@@ -1,3 +1,4 @@
+# EXAMPLE EXTRA VARS date_time_settings={"isNtpEnabled":true,"ntpServerNames":["1.1.1.1"],"timeZoneId":"Europe/Berlin","systemTime":"2021-02-03T13:26:12Z","synchronizingLocalTime":"22:00","adjustsDaylightSavingTime":true,"synchronizesNow":true}'
 - name: Login to Storage PFREST
   hosts: localhost
   vars_files:
@@ -11,7 +12,7 @@
       when: date_time_settings is undefined
 
     - meta: end_play
-      when: True
+      when: date_time_settings is undefined
 
     - name: 'Get Session Token'
       uri:
