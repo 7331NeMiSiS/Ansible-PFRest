@@ -33,8 +33,9 @@
           Accept: 'application/json'
           Content-Type: 'application/json'
           Authorization: 'Session {{token_response.json.token}}'
+        validate_certs: no
       register: available_timezone_response
-    - debug: var=available_timezone_response
+    - debug: var=available_timezone_response.json.data
 
 
     - name: 'Discard Session Token'

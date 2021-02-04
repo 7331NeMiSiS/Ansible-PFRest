@@ -33,13 +33,12 @@
         body:
           "{{date_time_settings}}"
         body_format: json
+        validate_certs: no
         headers:
           Accept: 'application/json'
           Content-Type: 'application/json'
           Authorization: 'Session {{token_response.json.token}}'
       register: result
-
-
 
     - name: 'Discard Session Token'
       uri:
