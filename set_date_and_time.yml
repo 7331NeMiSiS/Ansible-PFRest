@@ -6,12 +6,8 @@
     - myauthstring: "{{storage_username}}:{{storage_password}}"
 
   tasks:
-    - name: 'Check if Variables passed, else print help.'
-      msg: "Please pass date_time_settings variable, example date_time_settings: {\"isNtpEnabled\":true,\"ntpServerNames\":[\"1.1.1.1\"],\"timeZoneId\":\"Europe/Berlin\",\"systemTime\":\"2021-02-03T13:26:12Z\",\"synchronizingLocalTime\":\"22:00\",\"adjustsDaylightSavingTime\":true,\"synchronizesNow\":true}"
-      when: date_time_settings is undefined
-
     - name: 'Check if Variables passed'
-      debug: msg='Please pass date_time_settings variable, example date_time_settings'
+      debug: msg="Please pass date_time_settings variable, example date_time_settings:"
       when: date_time_settings is undefined
 
     - meta: end_play
