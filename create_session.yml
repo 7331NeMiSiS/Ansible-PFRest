@@ -1,0 +1,27 @@
+- name: 'Get Session Token'
+  vars:
+    - myauthstring: "{{storage_username}}:{{storage_password}}"
+  uri:
+    url: 'https://{{storage_ip}}/ConfigurationManager/v1/objects/sessions'
+    method: POST
+    body:
+      {"authenticationTimeout":600}
+    body_format: json
+    headers:
+      Connection: 'keep-alive'
+      Cache-Control: 'no-store'
+      Accept-Language: 'en'
+      Authorization: 'Basic {{myauthstring | b64encode}}'
+      Content-Type: 'application/json'
+      Accept: 'application/json, text/plain, */*'
+      Sec-Fetch-Site: 'same-origin'
+      Sec-Fetch-Mode: 'cors'
+      Sec-Fetch-Dest: 'empty'
+    validate_certs: no
+  register: token_response
+
+
+
+
+
+
