@@ -1,4 +1,4 @@
-# EXAMPLE EXTRA VARS ansible-playbook  set_date_and_time.yml --ask-vault-pass -e 'date_time_settings={"isNtpEnabled":true,"ntpServerNames":["1.1.1.1"],"timeZoneId":"Europe/Berlin","systemTime":"2021-02-04T10:30:12Z","synchronizingLocalTime":"22:00","adjustsDaylightSavingTime":true,"synchronizesNow":true}'
+
 - name: Login to Storage PFREST
   hosts: localhost
   vars_files:
@@ -38,8 +38,7 @@
       uri:
         url: 'https://{{storage_ip}}/ConfigurationManager/v1/objects/date-times/instance'
         method: POST
-        body:
-          "{{date_time_settings}} | json"
+        body: {"isNtpEnabled":true,"ntpServerNames":["1.1.1.1"],"timeZoneId":"Europe/Berlin","systemTime":"2021-02-04T10:30:12Z","synchronizingLocalTime":"22:00","adjustsDaylightSavingTime":true,"synchronizesNow":true}
         body_format: json
         validate_certs: no
         headers:
